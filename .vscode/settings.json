@@ -1,0 +1,7 @@
+{
+  "editor.defaultFormatter": "Trunk.io",
+  "editor.formatOnSave": true,
+  "[python]": {
+    "editor.defaultFormatter": "Trunk.io"
+  }
+}
