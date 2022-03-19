@@ -1,6 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from builtins import bytes, str
-from typing import Any, Callable, Dict, List, Set, Tuple, Union
+from typing import Any, Callable, Generic, TypeVar, Union
 
 from six import with_metaclass
 
@@ -14,7 +13,10 @@ class FormatError(Exception):
     pass
 
 
-class Format(with_metaclass(ABCMeta, object)):
+B = TypeVar(u"B")
+
+
+class Format(with_metaclass(ABCMeta, Generic[B])):
     def __init__(self, proxy_manager, proxy_creation_func):
         # type: (ProxyManager, Callable[[int], Proxy]) -> None
         self.proxy_manager = proxy_manager
@@ -22,10 +24,10 @@ class Format(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def translate_to_builtins(self, obj):
-        # type: (Union[Any, Request, Response, Exception]) -> Union[Dict, List, Tuple, Set, int, float, str, bytes]
+        # type: (Union[Any, Request, Response, Exception]) -> B
         pass
 
     @abstractmethod
     def translate_from_builtins(self, obj):
-        # type: (Union[Dict, List, Tuple, Set, int, float, str, bytes]) -> Any
+        # type: (B) -> Union[Any, Request, Response, Exception]
         pass

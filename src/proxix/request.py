@@ -1,5 +1,5 @@
 from enum import IntEnum, unique
-from typing import Dict, List, Optional
+from typing import Dict, Optional, Tuple
 
 
 class Request(object):
@@ -11,7 +11,7 @@ class Request(object):
         call = 3
 
     def __init__(self, request_type, obj_id=None, args=None, kwds=None):
-        # type: (TYPE, Optional[int], Optional[List], Optional[Dict]) -> None
+        # type: (Request.TYPE, Optional[int], Optional[Tuple], Optional[Dict]) -> None
         self.request_type = request_type
         self.obj_id = obj_id
         self.args = args

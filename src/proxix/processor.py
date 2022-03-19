@@ -1,8 +1,8 @@
 from typing import Any, Callable, Optional, Tuple
 
-from .response import Response
-from .request import Request
 from .manager import ProxyManager
+from .request import Request
+from .response import Response
 
 
 class BadRequestError(Exception):
@@ -25,10 +25,8 @@ class Processor(object):
 
     def handle(self, request):
         # type: (Request) -> Response
-        def lambda_func():
-            raise BadRequestError(request.request_type)
         obj = None
-        args = []
+        args = ()  # type: Tuple
         kwds = {}
         if request.obj_id is not None:
             obj = self.proxy_manager.get(request.obj_id)
@@ -36,13 +34,17 @@ class Processor(object):
             args = request.args
         if request.kwds:
             kwds = request.kwds
-        if request.request_type == Request.TYPE.getattribute:
-            lambda_func = lambda: getattr(obj, *args, **kwds)
-        if request.request_type == Request.TYPE.setattr:
-            lambda_func = lambda: setattr(obj, *args, **kwds)
-        if request.request_type == Request.TYPE.call:
-            lambda_func = lambda: obj(*args, **kwds)
-        if request.request_type == Request.TYPE.eval:
-            lambda_func = lambda: eval(*args, **kwds)
-        value, error = self._get_value_or_error(lambda_func)
-        return Response(request=request, value=value, error=error)
+        try:
+            if request.request_type == Request.TYPE.getattribute:
+                return Response(request=request, value=getattr(obj, *args, **kwds))
+            if request.request_type == Request.TYPE.setattr:
+                setattr(obj, *args, **kwds)
+                return Response(request=request)
+            if request.request_type == Request.TYPE.call:
+                assert obj is not None
+                return Response(request=request, value=obj(*args, **kwds))
+            if request.request_type == Request.TYPE.eval:
+                return Response(request=request, value=eval(*args, **kwds))
+        except Exception as e:
+            return Response(request=request, error=e)
+        return Response(request=request, error=BadRequestError(request.request_type))

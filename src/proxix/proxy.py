@@ -1,5 +1,5 @@
 from builtins import str
-from typing import Any, TYPE_CHECKING, List, Dict
+from typing import Any
 
 from .dispatcher import Dispatcher
 
@@ -22,8 +22,10 @@ class Proxy(object):
         if __name in (u"__obj_id", u"__dispatcher"):
             return super(Proxy, self).__setattr__(__name, __value)
         else:
-            return self.__dispatcher.set_proxied_attribute(self.__obj_id, __name, __value)
+            return self.__dispatcher.set_proxied_attribute(
+                self.__obj_id, __name, __value
+            )
 
     def __call__(self, *args, **kwds):
-        # type: (List[Any], Dict[Any]) -> Any
+        # type: (Any, Any) -> Any
         return self.__dispatcher.call(self.__obj_id, args, kwds)

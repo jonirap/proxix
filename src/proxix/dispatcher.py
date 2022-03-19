@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple
 
 from six import text_type
 
@@ -19,7 +19,7 @@ class Dispatcher(object):
             Request(
                 Request.TYPE.getattribute,
                 obj_id=obj_id,
-                args=[name],
+                args=(name,),
             )
         ).value
 
@@ -29,12 +29,12 @@ class Dispatcher(object):
             Request(
                 Request.TYPE.setattr,
                 obj_id=obj_id,
-                args=[name, value],
+                args=(name, value),
             )
         )
 
     def call(self, obj_id, args=None, kwds=None):
-        # type: (int, Optional[List], Optional[Dict]) -> Any
+        # type: (int, Optional[Tuple], Optional[Dict]) -> Any
         return self.send_request(
             Request(Request.TYPE.call, obj_id=obj_id, args=args, kwds=kwds)
         ).value
