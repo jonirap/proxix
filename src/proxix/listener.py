@@ -1,20 +1,21 @@
 from abc import ABCMeta, abstractmethod
 from typing import Generator, Generic, Type
 
-from six import with_metaclass
+from six import add_metaclass
 
 from .communicator import Communicator
 from .generics import D
 
 
-class Listener(with_metaclass(ABCMeta, Generic[D])):
+@add_metaclass(ABCMeta)
+class Listener(Generic[D]):
     @abstractmethod
     def listen(self):
         # type: () -> Generator[Communicator[D], None, None]
         pass
 
-    @abstractmethod
     @property
+    @abstractmethod
     def communicator_cls(cls):
         # type: () -> Type[Communicator[D]]
         pass

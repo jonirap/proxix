@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Any, Callable, Generic, TypeVar, Union
 
-from six import with_metaclass
+from six import add_metaclass
 
 from .manager import ProxyManager
 from .proxy import Proxy
@@ -16,7 +16,8 @@ class FormatError(Exception):
 B = TypeVar(u"B")
 
 
-class Format(with_metaclass(ABCMeta, Generic[B])):
+@add_metaclass(ABCMeta)
+class Format(Generic[B]):
     def __init__(self, proxy_manager, proxy_creation_func):
         # type: (ProxyManager, Callable[[int], Proxy]) -> None
         self.proxy_manager = proxy_manager

@@ -3,12 +3,13 @@ from builtins import bytes, str
 from io import BytesIO, StringIO
 from typing import IO, Any, Generic
 
-from six import with_metaclass
+from six import add_metaclass
 
 from .generics import D
 
 
-class Serializer(with_metaclass(ABCMeta, Generic[D])):
+@add_metaclass(ABCMeta)
+class Serializer(Generic[D]):
     @abstractmethod
     def load(self, fd):
         # type: (IO[D]) -> Any
@@ -30,12 +31,12 @@ class Serializer(with_metaclass(ABCMeta, Generic[D])):
         pass
 
 
-class BinarySerializer(with_metaclass(ABCMeta, Serializer[bytes])):
+@add_metaclass(ABCMeta)
+class BinarySerializer(Serializer[bytes]):
     def loads(self, data):
         # type: (bytes) -> Any
         return self.load(BytesIO(data))
 
-    @abstractmethod
     def dumps(self, obj):
         # type: (Any) -> bytes
         fd = BytesIO()
@@ -43,12 +44,12 @@ class BinarySerializer(with_metaclass(ABCMeta, Serializer[bytes])):
         return fd.getvalue()
 
 
-class TextSerializer(with_metaclass(ABCMeta, Serializer[str])):
+@add_metaclass(ABCMeta)
+class TextSerializer(Serializer[str]):
     def loads(self, data):
         # type: (str) -> Any
         return self.load(StringIO(data))
 
-    @abstractmethod
     def dumps(self, obj):
         # type: (Any) -> str
         fd = StringIO()
