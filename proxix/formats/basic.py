@@ -7,7 +7,7 @@ from ..request import Request
 from ..response import Response
 
 IMMUTABLE_TYPES = (int, float, str, bytes, None)
-ALLOWED_TYPES = Union[Dict, Tuple, int, float, str, bytes, None]
+ALLOWED_TYPES = Union[Dict, Tuple["ALLOWED_TYPES", ...], int, float, str, bytes, None]  # type: ignore
 IMMUTABLE_TYPES_NAMES = (u"int", u"float", u"str", u"bytes", u"None")
 
 
@@ -53,7 +53,7 @@ class BasicFormat(Format[Dict[str, ALLOWED_TYPES]]):
         return dict(t=u"o", v=self.proxy_manager.save(obj))
 
     def translate_from_builtins(self, obj):
-        # type: (Dict[str, ALLOWED_TYPES]) -> Union[ALLOWED_TYPES, Proxy, Response, Request]
+        # type: (Dict[str, ALLOWED_TYPES]) -> Union[ALLOWED_TYPES, Proxy, Response, Request, Any]
         if not isinstance(obj, dict) or u"t" not in obj or u"v" not in obj:
             raise FormatError(
                 u"Incorrect format passed. Expected dict with keys 't' and 'v'"

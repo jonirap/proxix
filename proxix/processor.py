@@ -6,7 +6,8 @@ from .response import Response
 
 
 class BadRequestError(Exception):
-    def __init__(self, request_type) -> None:
+    def __init__(self, request_type):
+        # type: (Request.TYPE) -> None
         super().__init__(u"Unknown request type: {}".format(request_type))
 
 
@@ -17,7 +18,7 @@ class Processor(object):
 
     @classmethod
     def _get_value_or_error(cls, func):
-        # type: (Callable) -> Tuple[Optional[Any], Optional[Exception]]
+        # type: (Callable[[], Any]) -> Tuple[Optional[Any], Optional[Exception]]
         try:
             return func(), None
         except Exception as e:
@@ -26,7 +27,7 @@ class Processor(object):
     def handle(self, request):
         # type: (Request) -> Response
         obj = None
-        args = ()  # type: Tuple
+        args = tuple()  # type: Tuple[Any, ...]
         kwds = {}
         if request.obj_id is not None:
             obj = self.proxy_manager.get(request.obj_id)

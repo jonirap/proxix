@@ -17,5 +17,7 @@ class ProxyManager(object):
         return self._proxied[obj_id]
 
     def delete(self, obj_id):
+        # type: (int) -> Optional[Any]
         if obj_id in self._proxied:
-            self._proxied.pop(obj_id)
+            return self._proxied.pop(obj_id)
+        return None

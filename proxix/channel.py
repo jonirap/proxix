@@ -2,7 +2,7 @@ from typing import IO, Any, Generator, Generic, Optional, Tuple, Type, Union
 
 from .communicator import Communicator
 from .dispatcher import Dispatcher
-from .format import Format
+from .format import B, Format
 from .generics import D
 from .manager import ProxyManager
 from .processor import Processor
@@ -21,7 +21,7 @@ class Channel(Generic[D]):
         buffer_factory,
         proxy_manager=None,
     ):
-        # type: (Communicator[D], Serializer[D], Type[Format], Type[IO[D]], Optional[ProxyManager]) -> None
+        # type: (Communicator[D], Serializer[D], Type[Format[B]], Type[IO[D]], Optional[ProxyManager]) -> None
         self.communicator = communicator  # type: Communicator[D]
         self.serializer = serializer  # type: Serializer[D]
         self.proxy_manager = proxy_manager or ProxyManager()

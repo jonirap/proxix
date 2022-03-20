@@ -34,13 +34,13 @@ class Dispatcher(object):
         )
 
     def call(self, obj_id, args=None, kwds=None):
-        # type: (int, Optional[Tuple], Optional[Dict]) -> Any
+        # type: (int, Optional[Tuple[Any, ...]], Optional[Dict[str, Any]]) -> Any
         return self.send_request(
             Request(Request.TYPE.call, obj_id=obj_id, args=args, kwds=kwds)
         ).value
 
     def eval(self, source, globals=None, locals=None):
-        # type: (text_type, Dict, Dict) -> Any
+        # type: (text_type, Optional[Dict[str, Any]], Optional[Dict[str, Any]]) -> Any
         return self.send_request(
             Request(
                 Request.TYPE.eval,

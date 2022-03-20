@@ -16,6 +16,7 @@ class TCPListener(Listener[bytes]):
 
     @classmethod
     def create(cls, host, port=2611):
+        # type: (str, int) -> TCPListener
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind((host, port))
         s.listen()
