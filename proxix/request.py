@@ -9,6 +9,7 @@ class Request(object):
         getattribute = 1
         setattr = 2
         call = 3
+        import_module = 4
 
     def __init__(self, request_type, obj_id=None, args=None, kwds=None):
         # type: (Request.TYPE, Optional[int], Optional[Tuple[Any, ...]], Optional[Dict[str, Any]]) -> None

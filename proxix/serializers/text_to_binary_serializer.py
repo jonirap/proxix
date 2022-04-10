@@ -5,6 +5,12 @@ from typing import IO, Any
 from ..serializer import BinarySerializer, TextSerializer
 
 
+class NoCloseTextIOWrapper(TextIOWrapper):
+    def close(self):
+        # type: () -> None
+        pass
+
+
 class TextToBinarySerializer(BinarySerializer):
     def __init__(self, serializer, encoding=u"utf-8"):
         # type: (TextSerializer, str) -> None
@@ -13,10 +19,12 @@ class TextToBinarySerializer(BinarySerializer):
 
     def load(self, fd):
         # type: (IO[bytes]) -> Any
-        return self._text_serializer.load(TextIOWrapper(fd, encoding=self._encoding))
+        return self._text_serializer.load(
+            NoCloseTextIOWrapper(fd, encoding=self._encoding)
+        )
 
     def dump(self, obj, fd):
         # type: (Any, IO[bytes]) -> int
         return self._text_serializer.dump(
-            obj, TextIOWrapper(fd, encoding=self._encoding)
+            obj, NoCloseTextIOWrapper(fd, encoding=self._encoding)
         )

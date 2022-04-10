@@ -1,5 +1,7 @@
 from typing import IO, Any, Generator, Generic, Optional, Tuple, Type, Union
 
+from boltons.tbutils import ExceptionInfo
+
 from .communicator import Communicator
 from .dispatcher import Dispatcher
 from .format import B, Format
@@ -10,6 +12,10 @@ from .proxy import Proxy
 from .request import Request
 from .response import Response
 from .serializer import Serializer
+
+
+class IOOperationOnClosedChannel(Exception):
+    pass
 
 
 class Channel(Generic[D]):
@@ -34,7 +40,7 @@ class Channel(Generic[D]):
         )
         self._open_channel = (
             None
-        )  # type: Optional[Generator[Union[Request, Response], Union[Request, Response], None]]
+        )  # type: Optional[Generator[Union[Request, Response], Optional[Union[Request, Response]], None]]
 
     def _handle_response(self, response):
         # type: (Union[Request, Response]) -> Response
@@ -48,30 +54,50 @@ class Channel(Generic[D]):
 
     def send_request(self, request):
         # type: (Request) -> Any
-        if not self._open_channel:
-            self._open_channel = self._communication_generator(request)
-            response = next(self._open_channel)
-        else:
-            response = self._open_channel.send(request)
+        print(request.request_type, request.obj_id, request.args, request.kwds)
+        created_channel = False  # type: bool
+        try:
+            if not self._open_channel:
+                created_channel = True
+                self._open_channel = self._communication_generator(request)
+                response = next(self._open_channel)
+            else:
+                response = self._open_channel.send(request)
+        except StopIteration:
+            raise IOOperationOnClosedChannel()
         response = self._handle_response(response)
-        if response.error is not None:
-            raise response.error
+        if created_channel:
+            try:
+                self._open_channel.send(None)
+            except StopIteration:
+                pass
+            self._open_channel = None
+        if response.remote_exception is not None:
+            raise response.remote_exception
         return response.value
 
     def listen(self):
         # type: () -> Any
-        if not self._open_channel:
-            self._open_channel = self._communication_generator()
-        request = next(self._open_channel)
-        while request is not None:
+        is_first = True
+        self._open_channel = self._communication_generator()
+        request = None
+        while request is not None or is_first:
             try:
+                if is_first:
+                    request = next(self._open_channel)
+                    is_first = False
                 assert isinstance(request, Request)
                 request = self._open_channel.send(self.processor.handle(request))
-            except KeyboardInterrupt:
+            except (KeyboardInterrupt, StopIteration):
+                try:
+                    self._open_channel.send(None)
+                except StopIteration:
+                    pass
+                self._open_channel = None
                 break
 
     def _communication_generator(self, request=None):
-        # type: (Optional[Request]) -> Generator[Union[Response, Request], Union[Response, Request], None]
+        # type: (Optional[Request]) -> Generator[Union[Response, Request], Optional[Union[Response, Request]], None]
         if request is not None:
             channel = self.communicator.send(
                 *self._get_buffer_and_length_from_obj(request)
@@ -83,6 +109,8 @@ class Channel(Generic[D]):
             message = self.format.translate_from_builtins(self.serializer.load(data))
             assert isinstance(message, (Request, Response))
             response = yield message
+            if response is None:
+                break
             try:
                 data = channel.send(self._get_buffer_and_length_from_obj(response))
             except StopIteration:

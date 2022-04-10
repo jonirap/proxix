@@ -16,4 +16,5 @@ class JSONSerializer(TextSerializer):
         # type: (Any, IO[str]) -> int
         start = fd.tell()
         json.dump(obj, fd)
+        fd.flush()
         return fd.tell() - start

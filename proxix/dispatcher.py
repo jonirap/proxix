@@ -1,17 +1,18 @@
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, Optional, Tuple
 
 from six import text_type
-
-if TYPE_CHECKING:
-    from .response import Response
 
 from .request import Request
 
 
 class Dispatcher(object):
     def __init__(self, send_request):
-        # type: (Callable[[Request], Response]) -> None
+        # type: (Callable[[Request], Any]) -> None
         self.send_request = send_request
+
+    def import_module(self, name):
+        # type: (text_type) -> Any
+        return self.send_request(Request(Request.TYPE.import_module, args=(name,)))
 
     def get_proxied_attribute(self, obj_id, name):
         # type: (int, text_type) -> Any
@@ -21,7 +22,7 @@ class Dispatcher(object):
                 obj_id=obj_id,
                 args=(name,),
             )
-        ).value
+        )
 
     def set_proxied_attribute(self, obj_id, name, value):
         # type: (int, text_type, Any) -> None
@@ -37,13 +38,13 @@ class Dispatcher(object):
         # type: (int, Optional[Tuple[Any, ...]], Optional[Dict[str, Any]]) -> Any
         return self.send_request(
             Request(Request.TYPE.call, obj_id=obj_id, args=args, kwds=kwds)
-        ).value
+        )
 
     def eval(self, source, globals=None, locals=None):
         # type: (text_type, Optional[Dict[str, Any]], Optional[Dict[str, Any]]) -> Any
         return self.send_request(
             Request(
                 Request.TYPE.eval,
-                kwds=dict(source=source, globals=globals, locals=locals),
+                args=(source, globals, locals),
             )
-        ).value
+        )

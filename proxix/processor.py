@@ -2,7 +2,7 @@ from typing import Any, Callable, Optional, Tuple
 
 from .manager import ProxyManager
 from .request import Request
-from .response import Response
+from .response import RemoteException, Response
 
 
 class BadRequestError(Exception):
@@ -45,7 +45,14 @@ class Processor(object):
                 assert obj is not None
                 return Response(request=request, value=obj(*args, **kwds))
             if request.request_type == Request.TYPE.eval:
-                return Response(request=request, value=eval(*args, **kwds))
-        except Exception as e:
-            return Response(request=request, error=e)
-        return Response(request=request, error=BadRequestError(request.request_type))
+                return Response(request=request, value=eval(*args))
+            if request.request_type == Request.TYPE.import_module:
+                return Response(request=request, value=__import__(*args, **kwds))
+        except Exception:
+            return Response(
+                request=request,
+                remote_exception=RemoteException.create_from_current(),
+            )
+        return Response(
+            request=request, remote_exception=BadRequestError(request.request_type)
+        )
