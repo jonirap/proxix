@@ -3,5 +3,8 @@
   "editor.formatOnSave": true,
   "[python]": {
     "editor.defaultFormatter": "Trunk.io"
-  }
+  },
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": ["tests"]
 }

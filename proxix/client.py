@@ -6,7 +6,7 @@ from .channel import Channel
 from .communicator import Communicator
 from .format import B, Format
 from .generics import D
-from .manager import ProxyManager
+from .proxy_manager import ProxyManager
 from .serializer import Serializer
 
 

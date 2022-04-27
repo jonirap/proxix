@@ -1,10 +1,11 @@
 from abc import ABCMeta, abstractmethod
-from typing import Any, Callable, Generic, TypeVar, Union
+from typing import Any, Generic, TypeVar, Union
 
 from six import add_metaclass
 
-from .manager import ProxyManager
-from .proxy import Proxy
+from .dispatcher import Dispatcher
+from .generated_manager import GeneratedManager
+from .proxy_manager import ProxyManager
 from .request import Request
 from .response import Response
 
@@ -18,10 +19,11 @@ B = TypeVar(u"B")
 
 @add_metaclass(ABCMeta)
 class Format(Generic[B]):
-    def __init__(self, proxy_manager, proxy_creation_func):
-        # type: (ProxyManager, Callable[[int], Proxy]) -> None
+    def __init__(self, proxy_manager, generated_manager, dispatcher):
+        # type: (ProxyManager, GeneratedManager, Dispatcher) -> None
         self.proxy_manager = proxy_manager
-        self.proxy_creation_func = proxy_creation_func
+        self.generated_manager = generated_manager
+        self.dispatcher = dispatcher
 
     @abstractmethod
     def translate_to_builtins(self, obj):

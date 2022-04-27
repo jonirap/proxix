@@ -1,14 +1,13 @@
 from typing import IO, Any, Generator, Generic, Optional, Tuple, Type, Union
 
-from boltons.tbutils import ExceptionInfo
-
 from .communicator import Communicator
 from .dispatcher import Dispatcher
 from .format import B, Format
+from .generated_manager import GeneratedManager
 from .generics import D
-from .manager import ProxyManager
 from .processor import Processor
 from .proxy import Proxy
+from .proxy_manager import ProxyManager
 from .request import Request
 from .response import Response
 from .serializer import Serializer
@@ -26,17 +25,20 @@ class Channel(Generic[D]):
         format_cls,
         buffer_factory,
         proxy_manager=None,
+        generated_manager=None,
     ):
-        # type: (Communicator[D], Serializer[D], Type[Format[B]], Type[IO[D]], Optional[ProxyManager]) -> None
+        # type: (Communicator[D], Serializer[D], Type[Format[B]], Type[IO[D]], Optional[ProxyManager], Optional[GeneratedManager]) -> None
         self.communicator = communicator  # type: Communicator[D]
         self.serializer = serializer  # type: Serializer[D]
         self.proxy_manager = proxy_manager or ProxyManager()
+        self.generated_manager = generated_manager or GeneratedManager()
         self.buffer_factory = buffer_factory  # type: Type[IO[D]]
         self.processor = Processor(proxy_manager=self.proxy_manager)
         self.dispatcher = Dispatcher(self.send_request)
         self.format = format_cls(
             proxy_manager=self.proxy_manager,
-            proxy_creation_func=lambda obj_id: Proxy(self.dispatcher, obj_id=obj_id),
+            generated_manager=self.generated_manager,
+            dispatcher=self.dispatcher,
         )
         self._open_channel = (
             None
@@ -74,6 +76,8 @@ class Channel(Generic[D]):
             self._open_channel = None
         if response.remote_exception is not None:
             raise response.remote_exception
+        if isinstance(response.value, Proxy):
+            print("Returned proxy {}".format(response.value))
         return response.value
 
     def listen(self):

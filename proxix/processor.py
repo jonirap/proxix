@@ -1,6 +1,6 @@
 from typing import Any, Callable, Optional, Tuple
 
-from .manager import ProxyManager
+from .proxy_manager import ProxyManager
 from .request import Request
 from .response import RemoteException, Response
 
@@ -54,5 +54,6 @@ class Processor(object):
                 remote_exception=RemoteException.create_from_current(),
             )
         return Response(
-            request=request, remote_exception=BadRequestError(request.request_type)
+            request=request,
+            remote_exception=RemoteException("Bad Request", ("", "", "")),
         )

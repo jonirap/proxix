@@ -7,7 +7,7 @@ from .channel import Channel
 from .format import B, Format
 from .generics import D
 from .listener import Listener
-from .manager import ProxyManager
+from .proxy_manager import ProxyManager
 from .serializer import Serializer
 
 

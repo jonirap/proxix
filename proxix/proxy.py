@@ -28,3 +28,10 @@ class Proxy(object):
     def __call__(self, *args, **kwds):
         # type: (Any, Any) -> Any
         return self.__dispatcher.call(self.__obj_id, args, kwds)
+
+
+class ExceptionProxy(BaseException, Proxy):
+    def __init__(self, dispatcher, obj_id):
+        # type: (Dispatcher, int) -> None
+        Proxy.__init__(self, dispatcher=dispatcher, obj_id=obj_id)
+        BaseException.__init__(self)

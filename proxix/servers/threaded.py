@@ -13,5 +13,7 @@ class ThreadedServer(Server[D]):
             t = Thread(target=channel.listen)
             threads.append(t)
             t.start()
+            print("Started thread {}".format(t.name))
+        print("Joining {} threads".format(len(threads)))
         for t in threads:
             t.join()
